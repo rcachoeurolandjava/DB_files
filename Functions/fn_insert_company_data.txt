@@ -1,0 +1,26 @@
+-- Author: Reygie
+-- Purpose: Insert data to company_data table and returns the number of rows affected
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_insert_company_data(
+	p_euroland_code_value text DEFAULT NULL::text,
+	p_name_value text DEFAULT NULL::text,
+	p_ticker_value text DEFAULT NULL::text,
+	p_isin_value text DEFAULT NULL::text,
+	p_market_value text DEFAULT NULL::text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+DECLARE ret integer;
+BEGIN
+    INSERT INTO selenium_data.company_data (euroland_code, name, ticker, isin, market) VALUES (p_euroland_code_value, p_name_value, p_ticker_value, p_isin_value, p_market_value);
+	GET DIAGNOSTICS ret = ROW_COUNT;
+	RETURN ret;
+END;
+
+$BODY$;

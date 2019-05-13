@@ -1,0 +1,22 @@
+-- Author: Reygie
+-- Purpose: Returns data from crawler_config table based on id given from the request
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawler_config(
+	p_id integer)
+    RETURNS TABLE(config jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ selenium_data.crawler_config.config
+ FROM
+ selenium_data.crawler_config
+ WHERE
+ id = p_id ;
+END; $BODY$;

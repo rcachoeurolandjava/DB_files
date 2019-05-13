@@ -1,0 +1,29 @@
+-- Author: Quan
+-- Purpose: Return all data from source_config table together with thier website name from crawl_source table
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_source_config(
+	)
+    RETURNS TABLE(id bigint, source_id bigint, cname character varying, config_text jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ selenium_data.source_config.id,
+ selenium_data.source_config.source_id,
+ website_name,
+ selenium_data.source_config.config_text
+ FROM
+ selenium_data.source_config
+ INNER JOIN
+ selenium_data.crawl_source
+ ON
+ selenium_data.crawl_source.id = selenium_data.source_config.source_id
+ AND
+ selenium_data.crawl_source.status = true ;
+END; $BODY$;

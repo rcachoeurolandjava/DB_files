@@ -1,0 +1,21 @@
+-- Author: Reygie
+-- Purpose: Insert data to source_config table and returns number of row/s affected
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_insert_source_config(
+	p_source_id_value bigint DEFAULT NULL::bigint,
+	p_config_text_value json DEFAULT NULL::json)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+DECLARE ret integer;
+BEGIN
+    INSERT INTO selenium_data.source_config (source_id, config_text) VALUES (p_source_id_value, p_config_text_value);
+	GET DIAGNOSTICS ret = ROW_COUNT;
+	RETURN ret;
+END;
+$BODY$;

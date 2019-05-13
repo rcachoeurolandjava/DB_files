@@ -1,0 +1,26 @@
+-- Author: Quan
+-- Purpose: Returns source config from source_config table that has match source_id and company name from the request
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_company_name(
+	p_company_name character varying)
+    RETURNS TABLE(config_text jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ selenium_data.source_config.config_text
+ FROM
+ selenium_data.source_config
+ INNER JOIN
+ selenium_data.crawl_source
+ ON
+ selenium_data.crawl_source.id = selenium_data.source_config.source_id
+ WHERE
+ website_name ILIKE p_company_name ;
+END; $BODY$;

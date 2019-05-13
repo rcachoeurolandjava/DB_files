@@ -1,0 +1,68 @@
+-- Author: Quan
+-- Purpose: return the information need to update the data
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_incorrect_crawled_data(
+	p_source_id integer,
+	p_jsondata json)
+    RETURNS TABLE(id bigint, crawl_data_id bigint, json_data jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$BEGIN
+DROP TABLE IF EXISTS crawl_data_temp;
+
+CREATE TEMP TABLE crawl_data_temp(source_id bigint, json_data jsonb);
+
+INSERT INTO crawl_data_temp (source_id, json_data) VALUES (p_source_id, p_jsonData);
+ RETURN QUERY
+
+with a1 as (
+	SELECT t.source_id, t.json_data,
+	jsonb_array_elements(t.json_data)::jsonb ddd
+	FROM crawl_data_temp t
+	where t.source_id in (select d.source_id from selenium_data.detailed_crawled_data d)
+	), a2 as(
+	select a1.source_id,
+  	to_timestamp((SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Date')::text, 'MM-dd-yyyy') AS standard_date
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Original Date') AS original_date
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Date Description') AS date_description
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Company Name') AS company
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Country') AS country
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Event') AS standard_event
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Original Event') AS original_event
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Event Description') AS event_description
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Period End') AS period_end
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Symbol') AS symbol
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'ISIN') AS isin
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Url') AS url
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Time') AS _time
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Time Description') AS time_description
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Time Zone') AS time_zone
+	,ddd as json_data
+	FROM a1 )
+	select d.id, d.crawl_data_id, a2.json_data
+	from a2
+	join selenium_data.detailed_crawled_data d
+	on a2.source_id = d.source_id
+	and ((a2.standard_date, d.standard_date) is NULL or a2.standard_date = d.standard_date)
+	and ((a2.original_date, d.original_date) is NULL or a2.original_date = d.original_date)
+	and ((a2.date_description, d.date_description) is NULL or a2.date_description = d.date_description)
+	and ((a2.company, d.company) is NULL or a2.company = d.company)
+	and ((a2.country, d.country) is NULL or a2.country = d.country)
+	and ((a2.standard_event, d.standard_event) is NULL or a2.standard_event = d.standard_event)
+	and ((a2.original_event, d.original_event) is NULL or a2.original_event = d.original_event)
+	and ((a2.event_description, d.event_description) is NULL or a2.event_description = d.event_description)
+	and ((a2.period_end, d.period_end) is NULL or a2.period_end = d.period_end)
+	and ((a2.symbol, d.symbol) is NULL or a2.symbol = d.symbol)
+	and ((a2.isin, d.isin) is NULL or a2.isin = d.isin)
+	and ((a2.url, d.url) is NULL or a2.url = d.url)
+	and ((a2._time, d._time) is NULL or a2._time = d._time)
+	and ((a2.time_description, d.time_description) is NULL or a2.time_description = d.time_description)
+	and ((a2.time_zone, d.time_zone) is NULL or a2.time_zone = d.time_zone)
+;
+	
+END; $BODY$;

@@ -1,0 +1,24 @@
+-- Author: Reygie
+-- Purpose: Returns data from crawl_data table based on source_id given on the request
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawl_data_by_source(
+	p_source integer)
+    RETURNS TABLE(id bigint, source_id bigint, json_data jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ selenium_data.crawl_data.id,
+ selenium_data.crawl_data.source_id,
+ selenium_data.crawl_data.json_data
+ FROM
+ selenium_data.crawl_data
+ WHERE
+ selenium_data.crawl_data.source_id = p_source ;
+END; $BODY$;

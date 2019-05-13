@@ -1,0 +1,26 @@
+-- Author: Quan
+-- Purpose: Update crawl_data and etailed_crawled_data status to false on one call of procedure
+-- Modified by: 
+-- Modification Date:
+
+CREATE OR REPLACE PROCEDURE selenium_data.proc_update_data(
+	p_id bigint DEFAULT NULL::bigint,
+	p_crawl_data_id bigint DEFAULT NULL::bigint,
+	p_json_data json DEFAULT NULL::json)
+LANGUAGE 'plpgsql'
+
+AS $BODY$
+BEGIN
+    -- update detailed_crawled_data status to false 
+    UPDATE selenium_data.detailed_crawled_data 
+    SET status = false
+    WHERE id = p_id;
+ 
+    -- adding the amount to the receiver's account
+    UPDATE selenium_data.crawl_data 
+    SET json_data = p_json_data
+    WHERE id = p_crawl_data_id;
+ 
+    COMMIT;
+END;
+$BODY$;

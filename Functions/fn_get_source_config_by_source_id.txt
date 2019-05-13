@@ -1,0 +1,22 @@
+-- Author: Reygie
+-- Purpose: Returns data from the source config from source_config table based on the source_id given from the request
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_by_source_id(
+	p_source_id integer)
+    RETURNS TABLE(config_text jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ selenium_data.source_config.config_text
+ FROM
+ selenium_data.source_config
+ WHERE
+ source_id = p_source_id ;
+END; $BODY$;

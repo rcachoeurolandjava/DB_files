@@ -1,0 +1,21 @@
+-- Author: Reygie
+-- Purpose: Return all data from company_data table
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_company_data(
+	)
+    RETURNS TABLE(id bigint, eurolandcode text, name text, ticker text, isin text, market text) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+BEGIN
+ RETURN QUERY
+	select * FROM selenium_data.company_data;
+	
+END; 
+$BODY$;

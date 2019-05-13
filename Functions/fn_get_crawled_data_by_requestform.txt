@@ -1,0 +1,41 @@
+-- Author: Quan
+-- Purpose: Returns data from crawl_data table defending of the given request from request form
+-- Modified by:
+-- Modification Date:
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawled_data_by_requestform(
+	p_fromdate timestamp without time zone DEFAULT NULL::timestamp without time zone,
+	p_todate timestamp without time zone DEFAULT NULL::timestamp without time zone,
+	p_sourceid integer DEFAULT NULL::integer,
+	p_companyname text DEFAULT NULL::text,
+	p_standardeventid integer DEFAULT NULL::integer,
+	p_companycode character varying DEFAULT NULL::character varying,
+	p_symbol text DEFAULT NULL::text,
+	p_isin text DEFAULT NULL::text)
+    RETURNS TABLE(id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, company text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text, website_region character varying, website_description text) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY
+select d.id, d.source_name, d.standard_date, d.original_date, d.date_description, d.company, d.country, e.name,
+d.standard_event, d.original_event, d.event_description, d.period_end, d.symbol, d.isin, d.url, d._time, d.time_description, d.time_zone,
+s.website_region, s.website_description
+from selenium_data.detailed_crawled_data d
+LEFT JOIN selenium_data.standard_events e
+ON d.standard_event = e.name
+INNER JOIN selenium_data.crawl_source s
+ON d.source_id = s.id
+where ((p_fromdate, p_todate) IS NULL OR (d.standard_date >= p_fromdate AND d.standard_date <= p_todate))
+		AND (p_sourceid IS NULL OR p_sourceid = 0 OR d.source_id = p_sourceid)
+		AND (p_companyname IS NULL OR p_companyname = '' OR LOWER(d.company) ~* p_companyname)
+		AND (p_standardeventid IS NULL OR p_standardeventid = 0 OR e.id = p_standardeventid)
+		AND (p_companycode IS NULL OR p_companycode = '' OR LOWER(d.company_code) ~* p_companycode)
+		AND (p_symbol IS NULL OR p_symbol = '' OR LOWER(d.symbol) ~* p_symbol)
+		AND (p_isin IS NULL OR p_isin = '' OR LOWER(d.isin) ~* p_isin)
+	order by d.standard_date ASC;
+	
+END; $BODY$;
