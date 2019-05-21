@@ -1,0 +1,27 @@
+-- Table: selenium_data.company_match
+
+-- DROP TABLE selenium_data.company_match;
+
+CREATE TABLE selenium_data.company_match
+(
+    id bigint NOT NULL DEFAULT nextval('selenium_data.company_match_id_seq'::regclass) ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    source_name text COLLATE pg_catalog."default",
+    euroland_code text COLLATE pg_catalog."default",
+    crawled_name text COLLATE pg_catalog."default",
+    euroland_name text COLLATE pg_catalog."default",
+    crawled_symbol text COLLATE pg_catalog."default",
+    euroland_symbol text COLLATE pg_catalog."default",
+    crawled_isin text COLLATE pg_catalog."default",
+    euroland_isin text COLLATE pg_catalog."default",
+    is_matched boolean,
+    is_confirmed boolean,
+    crawled_comp_name character varying(255) COLLATE pg_catalog."default",
+    db_comp_name character varying(255) COLLATE pg_catalog."default",
+    source_id integer,
+    symbol character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT company_match_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
