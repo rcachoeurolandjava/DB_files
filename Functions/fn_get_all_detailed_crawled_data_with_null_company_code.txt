@@ -1,0 +1,24 @@
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_detailed_crawled_data_with_null_company_code(
+	)
+    RETURNS TABLE(company text, id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text, website_region character varying, website_description text) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY
+select distinct on (d.company, d.symbol, d.source_name) d.company as com, d.id, d.source_name, d.standard_date, d.original_date, d.date_description, d.country, e.name,
+d.standard_event, d.original_event, d.event_description, d.period_end, d.symbol, d.isin, d.url, d._time, d.time_description, d.time_zone,
+s.website_region, s.website_description
+from selenium_data.detailed_crawled_data d 
+LEFT JOIN selenium_data.standard_events e
+ON d.standard_event = e.name
+INNER JOIN selenium_data.crawl_source s
+ON d.source_id = s.id
+where d.company_code is null
+order by com, d.source_name, d.symbol, d.isin;
+
+END; $BODY$;
+
