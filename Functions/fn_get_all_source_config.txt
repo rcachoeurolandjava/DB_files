@@ -3,6 +3,12 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_all_source_config()
+
+-- DROP FUNCTION selenium_data.fn_get_all_source_config();
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_all_source_config();
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_source_config(
 	)
     RETURNS TABLE(id bigint, source_id bigint, cname character varying, config_text jsonb) 
@@ -14,16 +20,13 @@ CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_source_config(
 AS $BODY$
 BEGIN
  RETURN QUERY SELECT
- selenium_data.source_config.id,
- selenium_data.source_config.source_id,
- website_name,
- selenium_data.source_config.config_text
+ c.id, c.source_id, website_name, c.config_text
  FROM
- selenium_data.source_config
+ selenium_data.source_config c
  INNER JOIN
- selenium_data.crawl_source
+ selenium_data.crawl_source s
  ON
- selenium_data.crawl_source.id = selenium_data.source_config.source_id
+ s.id = c.source_id
  AND
- selenium_data.crawl_source.status = true ;
+ s.status = true ;
 END; $BODY$;
