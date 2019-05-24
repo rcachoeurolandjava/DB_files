@@ -3,9 +3,15 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_source_config_company_name(character varying)
+
+-- DROP FUNCTION selenium_data.fn_get_source_config_company_name(character varying);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_source_config_company_name(character varying);
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_company_name(
 	p_company_name character varying)
-    RETURNS TABLE(config_text jsonb) 
+    RETURNS TABLE(id bigint, source_id bigint, config_text jsonb) 
     LANGUAGE 'plpgsql'
 
     COST 100
@@ -14,13 +20,13 @@ CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_company_name(
 AS $BODY$
 BEGIN
  RETURN QUERY SELECT
- selenium_data.source_config.config_text
+ c.id, c.source_id, c.config_text
  FROM
- selenium_data.source_config
+ selenium_data.source_config c
  INNER JOIN
- selenium_data.crawl_source
+ selenium_data.crawl_source s
  ON
- selenium_data.crawl_source.id = selenium_data.source_config.source_id
+ s.id = c.source_id
  WHERE
  website_name ILIKE p_company_name ;
 END; $BODY$;
