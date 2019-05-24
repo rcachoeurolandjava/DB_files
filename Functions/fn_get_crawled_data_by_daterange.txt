@@ -3,6 +3,12 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_crawled_data_by_daterange(timestamp with time zone, timestamp with time zone)
+
+-- DROP FUNCTION selenium_data.fn_get_crawled_data_by_daterange(timestamp with time zone, timestamp with time zone);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_crawled_data_by_daterange(timestamp with time zone, timestamp with time zone);
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawled_data_by_daterange(
 	p_startdate timestamp with time zone DEFAULT NULL::timestamp with time zone,
 	p_enddate timestamp with time zone DEFAULT NULL::timestamp with time zone)
