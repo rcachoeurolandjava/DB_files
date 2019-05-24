@@ -3,10 +3,16 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_incorrect_crawled_data(bigint, text)
+
+-- DROP FUNCTION selenium_data.fn_get_incorrect_crawled_data(bigint, text);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_incorrect_crawled_data(bigint, text);
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_incorrect_crawled_data(
-	p_source_id integer,
-	p_jsondata json)
-    RETURNS TABLE(id bigint, crawl_data_id bigint, json_data jsonb) 
+	p_source_id bigint,
+	p_jsonData text)
+    RETURNS TABLE(id bigint, crawldataid bigint, jsondata text) 
     LANGUAGE 'plpgsql'
 
     COST 100
@@ -17,7 +23,7 @@ DROP TABLE IF EXISTS crawl_data_temp;
 
 CREATE TEMP TABLE crawl_data_temp(source_id bigint, json_data jsonb);
 
-INSERT INTO crawl_data_temp (source_id, json_data) VALUES (p_source_id, p_jsonData);
+INSERT INTO crawl_data_temp (source_id, json_data) VALUES (p_source_id, p_jsonData::JSONB);
  RETURN QUERY
 
 with a1 as (
@@ -44,7 +50,7 @@ with a1 as (
  	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Time Zone') AS time_zone
 	,ddd as json_data
 	FROM a1 )
-	select d.id, d.crawl_data_id, a2.json_data
+	select d.id, d.crawl_data_id, a2.json_data::text
 	from a2
 	join selenium_data.detailed_crawled_data d
 	on a2.source_id = d.source_id
