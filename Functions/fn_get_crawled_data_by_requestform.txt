@@ -3,6 +3,12 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_crawled_data_by_requestform(timestamp without time zone, timestamp without time zone, integer, character varying, integer, character varying, text, text)
+
+-- DROP FUNCTION selenium_data.fn_get_crawled_data_by_requestform(timestamp without time zone, timestamp without time zone, integer, character varying, integer, character varying, text, text);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_crawled_data_by_requestform(timestamp without time zone, timestamp without time zone, integer, text, integer, character varying, text, text);
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawled_data_by_requestform(
 	p_fromdate timestamp without time zone DEFAULT NULL::timestamp without time zone,
 	p_todate timestamp without time zone DEFAULT NULL::timestamp without time zone,
@@ -12,7 +18,7 @@ CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawled_data_by_requestform(
 	p_companycode character varying DEFAULT NULL::character varying,
 	p_symbol text DEFAULT NULL::text,
 	p_isin text DEFAULT NULL::text)
-    RETURNS TABLE(id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, company text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text, website_region character varying, website_description text) 
+    RETURNS TABLE (id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, company text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text, website_region character varying, website_description text)
     LANGUAGE 'plpgsql'
 
     COST 100
@@ -36,6 +42,7 @@ where ((p_fromdate, p_todate) IS NULL OR (d.standard_date >= p_fromdate AND d.st
 		AND (p_companycode IS NULL OR p_companycode = '' OR LOWER(d.company_code) ~* p_companycode)
 		AND (p_symbol IS NULL OR p_symbol = '' OR LOWER(d.symbol) ~* p_symbol)
 		AND (p_isin IS NULL OR p_isin = '' OR LOWER(d.isin) ~* p_isin)
+		AND (d.status = true)
 	order by d.standard_date ASC;
 	
 END; $BODY$;
