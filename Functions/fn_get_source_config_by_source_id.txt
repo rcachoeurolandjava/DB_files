@@ -3,9 +3,15 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_source_config_by_source_id(bigint)
+
+-- DROP FUNCTION selenium_data.fn_get_source_config_by_source_id(bigint);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_source_config_by_source_id(bigint);
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_by_source_id(
-	p_source_id integer)
-    RETURNS TABLE(config_text jsonb) 
+	p_source_id bigint)
+    RETURNS TABLE(id bigint, source_id bigint, config_text jsonb) 
     LANGUAGE 'plpgsql'
 
     COST 100
@@ -14,9 +20,9 @@ CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_by_source_id(
 AS $BODY$
 BEGIN
  RETURN QUERY SELECT
- selenium_data.source_config.config_text
+ c.id, c.source_id, c.config_text
  FROM
- selenium_data.source_config
+ selenium_data.source_config c
  WHERE
- source_id = p_source_id ;
+ c.source_id = p_source_id ;
 END; $BODY$;
