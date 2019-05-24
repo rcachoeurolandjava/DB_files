@@ -3,8 +3,14 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_crawl_data_by_source(bigint)
+
+-- DROP FUNCTION selenium_data.fn_get_crawl_data_by_source(bigint);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_crawl_data_by_source(bigint);
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawl_data_by_source(
-	p_source integer)
+	p_source bigint)
     RETURNS TABLE(id bigint, source_id bigint, json_data jsonb) 
     LANGUAGE 'plpgsql'
 
@@ -14,11 +20,9 @@ CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawl_data_by_source(
 AS $BODY$
 BEGIN
  RETURN QUERY SELECT
- selenium_data.crawl_data.id,
- selenium_data.crawl_data.source_id,
- selenium_data.crawl_data.json_data
+ d.id, d.source_id, d.json_data
  FROM
- selenium_data.crawl_data
+ selenium_data.crawl_data d
  WHERE
- selenium_data.crawl_data.source_id = p_source ;
+ d.source_id = p_source ;
 END; $BODY$;
