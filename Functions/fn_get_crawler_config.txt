@@ -3,9 +3,15 @@
 -- Modified by:
 -- Modification Date:
 
+-- FUNCTION: selenium_data.fn_get_crawler_config(bigint)
+
+-- DROP FUNCTION selenium_data.fn_get_crawler_config(bigint);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_get_crawler_config(bigint);
+
 CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawler_config(
-	p_id integer)
-    RETURNS TABLE(config jsonb) 
+	p_id bigint)
+    RETURNS TABLE(id bigint, config jsonb)
     LANGUAGE 'plpgsql'
 
     COST 100
@@ -14,9 +20,9 @@ CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawler_config(
 AS $BODY$
 BEGIN
  RETURN QUERY SELECT
- selenium_data.crawler_config.config
+ c.id, c.config
  FROM
- selenium_data.crawler_config
+ selenium_data.crawler_config c
  WHERE
- id = p_id ;
+ c.id = p_id ;
 END; $BODY$;
