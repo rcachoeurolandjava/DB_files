@@ -1,14 +1,6 @@
--- Author: Sir Arved
--- Purpose: Trigger the insertion of filtered-out json data from crawl_data to detailed_crawled_data
--- Modified by:
--- Modification Date:
-
-CREATE FUNCTION selenium_data.newdata_added()
-    RETURNS trigger
-    LANGUAGE 'plpgsql'
-    COST 100
-    VOLATILE NOT LEAKPROOF 
-AS $BODY$
+CREATE OR REPLACE FUNCTION selenium_data.newdata_added()
+  RETURNS trigger AS
+$$
 begin
 	
 	with a1 as (
@@ -51,4 +43,5 @@ begin
  
     RETURN NEW;
 END;
-$BODY$;
+$$
+LANGUAGE 'plpgsql';
