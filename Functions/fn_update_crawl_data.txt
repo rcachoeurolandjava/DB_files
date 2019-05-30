@@ -1,0 +1,25 @@
+-- FUNCTION: selenium_data.fn_update_crawl_data(bigint, text)
+
+-- DROP FUNCTION selenium_data.fn_update_crawl_data(bigint, text);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_update_crawl_data(bigint, text);
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_update_crawl_data(
+	p_id bigint DEFAULT NULL::bigint,
+	p_json_data text DEFAULT NULL::text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+DECLARE ret integer;
+BEGIN
+    -- remove incorrect data in json data
+    UPDATE selenium_data.crawl_data SET json_data = p_json_data::JSONB WHERE id = p_id;
+	GET DIAGNOSTICS ret = ROW_COUNT;
+	RETURN ret;
+END;
+
+$BODY$;
