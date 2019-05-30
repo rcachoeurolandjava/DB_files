@@ -1,0 +1,24 @@
+-- FUNCTION: selenium_data.fn_update_detailed_crawled_data(bigint)
+
+-- DROP FUNCTION selenium_data.fn_update_detailed_crawled_data(bigint);
+
+DROP FUNCTION IF EXISTS selenium_data.fn_update_detailed_crawled_data(bigint);
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_update_detailed_crawled_data(
+	p_id bigint DEFAULT NULL::bigint)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+DECLARE ret integer;
+BEGIN
+    -- update detailed_crawled_data status to false 
+    UPDATE selenium_data.detailed_crawled_data SET status = false WHERE id = p_id;
+	GET DIAGNOSTICS ret = ROW_COUNT;
+	RETURN ret;
+END;
+
+$BODY$;
