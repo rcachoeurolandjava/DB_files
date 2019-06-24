@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION selenium_data.update_company_code_from_update()
+CREATE OR REPLACE FUNCTION selenium_data.update_company_code_from_insert()
     RETURNS trigger
     LANGUAGE 'plpgsql'
     COST 100
