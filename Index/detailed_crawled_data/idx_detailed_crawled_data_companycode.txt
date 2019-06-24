@@ -1,0 +1,4 @@
+CREATE INDEX idx_detailed_crawled_data_companycode
+    ON selenium_data.detailed_crawled_data USING btree
+    (lower(company_code::text) COLLATE pg_catalog."default")
+    TABLESPACE pg_default;

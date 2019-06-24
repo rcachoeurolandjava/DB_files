@@ -1,0 +1,4 @@
+CREATE INDEX idx_detailed_crawled_data_standartdate
+    ON selenium_data.detailed_crawled_data USING btree
+    (standard_date)
+    TABLESPACE pg_default;

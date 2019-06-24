@@ -1,0 +1,4 @@
+CREATE INDEX idx_detailed_crawled_data_reqform
+    ON selenium_data.detailed_crawled_data USING btree
+    (standard_date, source_id, company COLLATE pg_catalog."default", id, company_code COLLATE pg_catalog."default", symbol COLLATE pg_catalog."default", isin COLLATE pg_catalog."default")
+    TABLESPACE pg_default;

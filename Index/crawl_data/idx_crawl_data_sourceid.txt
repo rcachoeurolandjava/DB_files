@@ -1,0 +1,4 @@
+CREATE INDEX idx_crawl_data_sourceid
+    ON selenium_data.crawl_data USING btree
+    (source_id)
+    TABLESPACE pg_default;
