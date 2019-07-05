@@ -1,4 +1,4 @@
-CREATE FUNCTION selenium_data.update_company_match_euroland_code_from_insert()
+CREATE FUNCTION selenium_data.update_company_code_from_insert_or_update()
     RETURNS trigger
     LANGUAGE 'plpgsql'
     COST 100
