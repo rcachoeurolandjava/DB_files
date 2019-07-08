@@ -1,3 +1,8 @@
+-- Author: Reygie
+-- Purpose: This trigger function update company_code in detailed_crawled_data if new data inserted on it.
+-- Modified by:
+-- Modification Date:
+
 CREATE FUNCTION selenium_data.update_company_code_from_insert()
     RETURNS trigger
     LANGUAGE 'plpgsql'
