@@ -1,8 +1,0 @@
--- Index: idx_crawl_data_source_id
-
--- DROP INDEX selenium_data.idx_crawl_data_source_id;
-
-CREATE INDEX idx_crawl_data_source_id
-    ON selenium_data.crawl_data USING btree
-    (source_id)
-    TABLESPACE pg_default;

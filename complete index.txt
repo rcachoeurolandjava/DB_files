@@ -1,0 +1,25 @@
+CREATE INDEX idx_crawl_data_sourceid
+    ON selenium_data.crawl_data USING btree
+    (source_id)
+    TABLESPACE pg_default;
+
+
+CREATE INDEX idx_crawl_data_source_id
+    ON selenium_data.crawl_data USING btree
+    (source_id)
+    TABLESPACE pg_default;
+
+CREATE INDEX idx_detailed_crawled_data_companycode
+    ON selenium_data.detailed_crawled_data USING btree
+    (lower(company_code::text) COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+
+CREATE INDEX idx_detailed_crawled_data_reqform
+    ON selenium_data.detailed_crawled_data USING btree
+    (standard_date, source_id, company COLLATE pg_catalog."default", id, company_code COLLATE pg_catalog."default", symbol COLLATE pg_catalog."default", isin COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+
+CREATE INDEX idx_detailed_crawled_data_standartdate
+    ON selenium_data.detailed_crawled_data USING btree
+    (standard_date)
+    TABLESPACE pg_default;
