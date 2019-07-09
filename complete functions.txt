@@ -1,0 +1,313 @@
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_detailed_crawled_data_by_company_code(
+	p_companycode character varying DEFAULT NULL::character varying)
+    RETURNS TABLE(id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, company text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text, website_region character varying, website_description text) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY
+select d.id, d.source_name, d.standard_date, d.original_date, d.date_description, d.company, d.country, e.name,
+d.standard_event, d.original_event, d.event_description, d.period_end, d.symbol, d.isin, d.url, d._time, d.time_description, d.time_zone,
+s.website_region, s.website_description
+from selenium_data.detailed_crawled_data d
+LEFT JOIN selenium_data.standard_events e
+ON d.standard_event = e.name
+INNER JOIN selenium_data.crawl_source s
+ON d.source_id = s.id
+where (p_companycode IS NULL OR p_companycode = '' OR LOWER(d.company_code) ~* p_companycode) AND d.status = true
+	order by d.standard_date ASC;
+	
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_detailed_crawled_data_with_null_company_code(
+	)
+    RETURNS TABLE(id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, company text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY
+select distinct on(dd.source_name, dd.company, dd.symbol, dd.isin) 
+dd.id, dd.source_name, dd.standard_date, dd.original_date,
+dd.date_description, dd.company, dd.country, dd.event_type, dd.standard_event, dd.original_event,
+dd.event_description, dd.period_end, dd.symbol, dd.isin, dd.url, dd._time, dd.time_description, dd.time_zone
+from selenium_data.detailed_crawled_data dd where dd.company_code is null order by dd.source_name, dd.company, dd.symbol, dd.isin;
+
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_all_source_config(
+	)
+    RETURNS TABLE(id bigint, source_id bigint, cname character varying, config_text jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ c.id, c.source_id, website_name, c.config_text
+ FROM
+ selenium_data.source_config c
+ INNER JOIN
+ selenium_data.crawl_source s
+ ON
+ s.id = c.source_id
+ AND
+ s.status = true ;
+END; $BODY$;
+
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawl_data_by_source(
+	p_source bigint)
+    RETURNS TABLE(id bigint, source_id bigint, json_data jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ d.id, d.source_id, d.json_data
+ FROM
+ selenium_data.crawl_data d
+ WHERE
+ d.source_id = p_source ;
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawled_data_by_daterange(
+	p_startdate timestamp with time zone DEFAULT NULL::timestamp with time zone,
+	p_enddate timestamp with time zone DEFAULT NULL::timestamp with time zone)
+    RETURNS TABLE(id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, company text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text, website_region character varying, website_description text) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$BEGIN
+ RETURN QUERY
+select d.id, d.source_name, d.standard_date, d.original_date, d.date_description, d.company, d.country, e.name,
+d.standard_event, d.original_event, d.event_description, d.period_end, d.symbol, d.isin, d.url, d._time, d.time_description, d.time_zone,
+s.website_region, s.website_description
+from selenium_data.detailed_crawled_data d
+LEFT JOIN selenium_data.standard_events e
+ON d.standard_event = e.name
+INNER JOIN selenium_data.crawl_source s
+ON d.source_id = s.id
+where 
+	CASE 
+		WHEN (p_startdate, p_enddate) IS NOT NULL
+		     THEN d.standard_date >= p_startdate
+			 AND d.standard_date <= p_enddate
+			 AND d.status = true
+	END
+	order by standard_date ASC;
+	
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawled_data_by_requestform(
+	p_fromdate timestamp without time zone DEFAULT NULL::timestamp without time zone,
+	p_todate timestamp without time zone DEFAULT NULL::timestamp without time zone,
+	p_sourceid integer DEFAULT NULL::integer,
+	p_companyname text DEFAULT NULL::text,
+	p_standardeventid integer DEFAULT NULL::integer,
+	p_companycode character varying DEFAULT NULL::character varying,
+	p_symbol text DEFAULT NULL::text,
+	p_isin text DEFAULT NULL::text)
+    RETURNS TABLE (id bigint, source_name text, standard_date timestamp without time zone, original_date text, date_description text, company text, country text, event_type character varying, standard_event text, original_event text, event_description text, period_end text, symbol text, isin text, url text, _time text, time_description text, time_zone text, website_region character varying, website_description text)
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY
+select d.id, d.source_name, d.standard_date, d.original_date, d.date_description, d.company, d.country, e.name,
+d.standard_event, d.original_event, d.event_description, d.period_end, d.symbol, d.isin, d.url, d._time, d.time_description, d.time_zone,
+s.website_region, s.website_description
+from selenium_data.detailed_crawled_data d
+LEFT JOIN selenium_data.standard_events e
+ON d.standard_event = e.name
+INNER JOIN selenium_data.crawl_source s
+ON d.source_id = s.id
+where ((p_fromdate, p_todate) IS NULL OR (d.standard_date >= p_fromdate AND d.standard_date <= p_todate))
+		AND (p_sourceid IS NULL OR p_sourceid = 0 OR d.source_id = p_sourceid)
+		AND (p_companyname IS NULL OR p_companyname = '' OR LOWER(d.company) ~* p_companyname)
+		AND (p_standardeventid IS NULL OR p_standardeventid = 0 OR e.id = p_standardeventid)
+		AND (p_companycode IS NULL OR p_companycode = '' OR LOWER(d.company_code) ~* p_companycode)
+		AND (p_symbol IS NULL OR p_symbol = '' OR LOWER(d.symbol) ~* p_symbol)
+		AND (p_isin IS NULL OR p_isin = '' OR LOWER(d.isin) ~* p_isin)
+		AND (d.status = true)
+	order by d.standard_date ASC;
+	
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_crawler_config(
+	p_id bigint)
+    RETURNS TABLE(id bigint, config jsonb)
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ c.id, c.config
+ FROM
+ selenium_data.crawler_config c
+ WHERE
+ c.id = p_id ;
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_incorrect_crawled_data(
+	p_source_id bigint,
+	p_jsonData text)
+    RETURNS TABLE(id bigint, crawldataid bigint, jsondata text) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$BEGIN
+DROP TABLE IF EXISTS crawl_data_temp;
+
+CREATE TEMP TABLE crawl_data_temp(source_id bigint, json_data jsonb);
+
+INSERT INTO crawl_data_temp (source_id, json_data) VALUES (p_source_id, p_jsonData::JSONB);
+ RETURN QUERY
+
+with a1 as (
+	SELECT t.source_id, t.json_data,
+	jsonb_array_elements(t.json_data)::jsonb ddd
+	FROM crawl_data_temp t
+	where t.source_id in (select d.source_id from selenium_data.detailed_crawled_data d)
+	), a2 as(
+	select a1.source_id,
+  	to_timestamp((SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Date')::text, 'MM-dd-yyyy') AS standard_date
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Original Date') AS original_date
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Date Description') AS date_description
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Company Name') AS company
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Country') AS country
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Event') AS standard_event
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Original Event') AS original_event
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Event Description') AS event_description
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Period End') AS period_end
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Symbol') AS symbol
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'ISIN') AS isin
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Url') AS url
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Time') AS _time
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Time Description') AS time_description
+ 	,(SELECT string_agg(p->>'value', ',') FROM jsonb_array_elements(ddd) p WHERE p->>'header' = 'Time Zone') AS time_zone
+	,ddd as json_data
+	FROM a1 )
+	select d.id, d.crawl_data_id, a2.json_data::text
+	from a2
+	join selenium_data.detailed_crawled_data d
+	on a2.source_id = d.source_id
+	and ((a2.standard_date, d.standard_date) is NULL or a2.standard_date = d.standard_date)
+	and ((a2.original_date, d.original_date) is NULL or a2.original_date = d.original_date)
+	and ((a2.date_description, d.date_description) is NULL or a2.date_description = d.date_description)
+	and ((a2.company, d.company) is NULL or a2.company = d.company)
+	and ((a2.country, d.country) is NULL or a2.country = d.country)
+	and ((a2.standard_event, d.standard_event) is NULL or a2.standard_event = d.standard_event)
+	and ((a2.original_event, d.original_event) is NULL or a2.original_event = d.original_event)
+	and ((a2.event_description, d.event_description) is NULL or a2.event_description = d.event_description)
+	and ((a2.period_end, d.period_end) is NULL or a2.period_end = d.period_end)
+	and ((a2.symbol, d.symbol) is NULL or a2.symbol = d.symbol)
+	and ((a2.isin, d.isin) is NULL or a2.isin = d.isin)
+	and ((a2.url, d.url) is NULL or a2.url = d.url)
+	and ((a2._time, d._time) is NULL or a2._time = d._time)
+	and ((a2.time_description, d.time_description) is NULL or a2.time_description = d.time_description)
+	and ((a2.time_zone, d.time_zone) is NULL or a2.time_zone = d.time_zone)
+;
+	
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_by_source_id(
+	p_source_id bigint)
+    RETURNS TABLE(id bigint, source_id bigint, config_text jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ c.id, c.source_id, c.config_text
+ FROM
+ selenium_data.source_config c
+ WHERE
+ c.source_id = p_source_id ;
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_get_source_config_company_name(
+	p_company_name character varying)
+    RETURNS TABLE(id bigint, source_id bigint, config_text jsonb) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+BEGIN
+ RETURN QUERY SELECT
+ c.id, c.source_id, c.config_text
+ FROM
+ selenium_data.source_config c
+ INNER JOIN
+ selenium_data.crawl_source s
+ ON
+ s.id = c.source_id
+ WHERE
+ website_name ILIKE p_company_name ;
+END; $BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_update_crawl_data(
+	p_id bigint DEFAULT NULL::bigint,
+	p_json_data text DEFAULT NULL::text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+DECLARE ret integer;
+BEGIN
+    -- remove incorrect data in json data
+    UPDATE selenium_data.crawl_data SET json_data = p_json_data::JSONB WHERE id = p_id;
+	GET DIAGNOSTICS ret = ROW_COUNT;
+	RETURN ret;
+END;
+
+$BODY$;
+
+CREATE OR REPLACE FUNCTION selenium_data.fn_update_detailed_crawled_data(
+	p_id bigint DEFAULT NULL::bigint)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+DECLARE ret integer;
+BEGIN
+    -- update detailed_crawled_data status to false 
+    UPDATE selenium_data.detailed_crawled_data SET status = false WHERE id = p_id;
+	GET DIAGNOSTICS ret = ROW_COUNT;
+	RETURN ret;
+END;
+
+$BODY$;
+
